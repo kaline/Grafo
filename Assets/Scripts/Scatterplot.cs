@@ -14,7 +14,7 @@ public class Scatterplot : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        LoadPoints("Data/legislature54");
+        LoadPoints("Data/deputadosColorsHex");
     }
 
     // Update is called once per frame
@@ -48,21 +48,23 @@ public class Scatterplot : MonoBehaviour
 
             newDataPoint.transform.position += this.transform.position;
             newDataPoint.transform.parent = this.transform;
-            newDataPoint.gameObject.name = csvData[i]["Name"].ToString();
+            newDataPoint.gameObject.name = csvData[i]["nome"].ToString();
 
-            newDataPoint.dataClass = csvData[i]["Party"].ToString();
+            newDataPoint.dataClass = csvData[i]["siglaPartido"].ToString();
 
-            newDataPoint.textLabel.text = csvData[i]["Name"].ToString() + " (" + newDataPoint.dataClass + ")";
+            newDataPoint.textLabel.text = csvData[i]["nome"].ToString() + " (" + newDataPoint.dataClass + ")";
 
             Color newColor = new Color();
-            ColorUtility.TryParseHtmlString(csvData[i]["alternativeColorMap"].ToString(), out newColor);
+            ColorUtility.TryParseHtmlString(csvData[i]["cores"].ToString(), out newColor);
             newColor.a = 1f;
             newDataPoint.GetComponent<Renderer>().material.color = newColor;
             newDataPoint.pointColor = newColor;
 
             scatterplotPoints.Add(newDataPoint);
-        }
 
+
+        }
+        
 
         // Should also adjust size of scatterplot collider box here based on points positions
 
