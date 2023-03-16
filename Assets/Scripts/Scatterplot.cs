@@ -119,7 +119,7 @@ public class Scatterplot : MonoBehaviour
 
             float z = 0.05f * System.Convert.ToSingle(csvData[i]["z"]);
             
-            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x, y, z), Quaternion.identity).
+            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*6, y*6, z*6), Quaternion.identity).
                 GetComponent<ScatterplotDataPoint>();
 
             newDataPoint.transform.position += this.transform.position;
@@ -257,14 +257,14 @@ public class Scatterplot : MonoBehaviour
 
         foreach (ScatterplotDataPoint point in closestPoints)
         {
-            GameObject newLine = new GameObject();
+            GameObject newLine = new GameObject("Edge");
             newLine.transform.parent = selectedPoint.transform;
             LineRenderer lineRenderer = newLine.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             lineRenderer.startColor = selectedPoint.pointColor;
             lineRenderer.endColor = point.pointColor;
-            lineRenderer.startWidth = 0.0002f;
-            lineRenderer.endWidth = 0.0002f;
+            lineRenderer.startWidth = 0.0006f;
+            lineRenderer.endWidth = 0.0006f;
             lineRenderer.SetPosition(0, selectedPoint.transform.position);
             lineRenderer.SetPosition(1, point.transform.position);
         }
