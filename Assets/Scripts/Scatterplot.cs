@@ -20,7 +20,7 @@ public class Scatterplot : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-        LoadPoints("Data/deputadosColorsHex");
+        LoadPoints("Data/deputados_valid_result");
 
         // Find all ScatterplotDataPoints in the scene
         ScatterplotDataPoint[] points = FindObjectsOfType<ScatterplotDataPoint>();
