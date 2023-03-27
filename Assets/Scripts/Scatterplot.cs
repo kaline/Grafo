@@ -14,6 +14,7 @@ public class Scatterplot : MonoBehaviour
     private ScatterplotDataPoint selectedPoint = null;
     private bool isConnected = false;
 
+    public string edge = "Edge";
 
 
 
@@ -30,30 +31,16 @@ public class Scatterplot : MonoBehaviour
         }
     }
 
-    // Update is called once per frame
-    //void Update()
-    //{
-
-       // if (Input.GetMouseButtonDown(0))
-       // {
-            //ConnectSpheresOnClick();
-    // If a point is already selected, try to connect it to the closest point
-    // if (selectedPoint != null && !isConnected)
-    //  {
-    //ConnectClosestPoints(selectedPoint);
-
-    // }
-    //  }
 
 
-    //}
 
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) // check for left mouse button click
-        {
+        {            
 
             ConnectPoints();
+
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
 
@@ -71,21 +58,6 @@ public class Scatterplot : MonoBehaviour
 
                     if (distance <= connectDistance) // if the distance between the points is less than the threshold
                     {
-                        // create a line renderer to connect the points
-                        GameObject line = new GameObject("Line");
-                        LineRenderer lineRenderer = line.AddComponent<LineRenderer>();
-                        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-                        lineRenderer.startColor = Color.white;
-                        lineRenderer.endColor = Color.white;
-                        lineRenderer.startWidth = 0.0002f;
-                        lineRenderer.endWidth = 0.0002f;
-
-                        // set the line renderer's positions to the points' positions
-                        lineRenderer.SetPosition(0, selectedPoint.transform.position);
-                        lineRenderer.SetPosition(1, clickedPoint.transform.position);
-
-                        // parent the line renderer to the scatterplot gameobject
-                        line.transform.parent = transform;
 
                         // deselect the points
                         selectedPoint = null;
@@ -96,6 +68,7 @@ public class Scatterplot : MonoBehaviour
                 }
             }
         }
+
     }
 
 
@@ -176,69 +149,7 @@ public class Scatterplot : MonoBehaviour
 
 
 
-    //public void DumpPoints()
-    //{
-    //    foreach (ScatterplotDataPoint point in scatterplotPoints)
-    //    {
-    //        Destroy(point.gameObject);
-    //    }
-    //}
 
-    //// Called when a ScatterplotDataPoint is selected
-    //public void OnPointSelected(GameObject pointObject)
-    //{
-    //    // Find the ScatterplotDataPoint component of the selected point
-    //    selectedPoint = pointObject.GetComponent<ScatterplotDataPoint>();
-    //    isConnected = false;
-    //}
-
-    //// Called when a ScatterplotDataPoint is deselected
-    //public void OnPointDeselected(GameObject pointObject)
-    //{
-    //    // Clear the selected point
-    //    selectedPoint = null;
-    //}
-
-    //void ConnectClosestPoints(ScatterplotDataPoint point)
-    //{
-    //    ScatterplotDataPoint closestPoint = null;
-    //    float closestDistance = float.MaxValue;
-
-    //    // Find the closest point to the selected point
-    //    foreach (ScatterplotDataPoint otherPoint in scatterplotPoints)
-    //    {
-    //        if (otherPoint != point)
-    //        {
-    //            float distance = Vector3.Distance(point.transform.position, otherPoint.transform.position);
-    //            if (distance < closestDistance)
-    //            {
-    //                closestPoint = otherPoint;
-    //                closestDistance = distance;
-    //            }
-    //        }
-    //    }
-
-    //    // If the closest point is within the connect distance, connect the points
-    //    if (closestPoint != null && closestDistance < connectDistance)
-    //    {
-    //        ConnectPoints(point, closestPoint);
-    //        isConnected = true;
-    //    }
-    //}
-
-    //void ConnectPoints(ScatterplotDataPoint pointA, ScatterplotDataPoint pointB)
-    //{
-    //    GameObject newEdge = new GameObject("Edge " + pointA.gameObject.name + "-" + pointB.gameObject.name);
-    //    newEdge.transform.parent = this.transform;
-
-    //    LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
-    //    lineRenderer.startWidth = 0.02f;
-    //    lineRenderer.endWidth = 0.02f;
-    //    lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-
-    //    lineRenderer.SetPosition(0, pointA.transform.position);
-    //    lineRenderer.SetPosition(1, pointB.transform.position);
-    //}
 
 
     public void ConnectPoints()
@@ -257,7 +168,7 @@ public class Scatterplot : MonoBehaviour
 
         foreach (ScatterplotDataPoint point in closestPoints)
         {
-            GameObject newLine = new GameObject("Edge");
+            GameObject newLine = new GameObject(edge);
             newLine.transform.parent = selectedPoint.transform;
             LineRenderer lineRenderer = newLine.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
@@ -270,6 +181,8 @@ public class Scatterplot : MonoBehaviour
         }
 
         isConnected = true;
+
+      
     }
 
 
