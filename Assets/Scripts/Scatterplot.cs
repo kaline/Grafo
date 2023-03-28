@@ -1,34 +1,56 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 
 public class Scatterplot : MonoBehaviour
 {
-
+    private string filename = Application.dataPath + "/Resources/Data/deputados_valid_result.csv";
     public GameObject pointPrefab;
     List<ScatterplotDataPoint> scatterplotPoints = null;
 
-    public float connectDistance = 0.2f;
+    public float connectDistance = 0.0001f;
 
     private ScatterplotDataPoint selectedPoint = null;
     private bool isConnected = false;
 
     public string edge = "Edge";
 
+    private bool scatterplotMoved = false;
+
 
 
     // Use this for initialization
     void Start()
     {
-        LoadPoints("Data/deputados_valid_result");
 
-        // Find all ScatterplotDataPoints in the scene
-        ScatterplotDataPoint[] points = FindObjectsOfType<ScatterplotDataPoint>();
-        foreach (ScatterplotDataPoint point in points)
+        try
         {
-            scatterplotPoints.Add(point);
+            LoadPoints("Data/deputados_valid_result");
+
+            // Find all ScatterplotDataPoints in the scene
+            ScatterplotDataPoint[] points = FindObjectsOfType<ScatterplotDataPoint>();
+            foreach (ScatterplotDataPoint point in points)
+            {
+                scatterplotPoints.Add(point);
+            }
         }
+        catch (DirectoryNotFoundException e)
+        {
+            Debug.LogError("The directory was not found. " + e.Message);
+        }
+        catch (FileNotFoundException e)
+        {
+            Debug.LogError("The file was not found. " + e.Message);
+        }
+        catch (IOException e)
+        {
+            Debug.LogError("An IO error occurred while reading the file. " + e.Message);
+        }
+
+
     }
 
 
@@ -37,8 +59,14 @@ public class Scatterplot : MonoBehaviour
     void Update()
     {
         if (Input.GetMouseButtonDown(0)) // check for left mouse button click
-        {            
+        {
 
+            if (scatterplotPointsMoved())
+            {
+                scatterplotMoved = true;
+            }
+
+            //RemoveAllEdges();
             ConnectPoints();
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
@@ -72,12 +100,11 @@ public class Scatterplot : MonoBehaviour
     }
 
 
-
     public void LoadPoints(string datasetPath)
     {
         //if(scatterplotPoints != null)
            // DumpPoints();
-
+            
         scatterplotPoints = new List<ScatterplotDataPoint>();
 
         List<Dictionary<string, object>> csvData = CSVReader.Read(datasetPath);
@@ -108,6 +135,21 @@ public class Scatterplot : MonoBehaviour
             newColor.a = 1f;
             newDataPoint.GetComponent<Renderer>().material.color = newColor;
             newDataPoint.pointColor = newColor;
+
+
+
+
+            // similar deputies columns
+           
+
+                for (int j = 1; j <= 10; j++)
+                {
+                    newDataPoint.gameObject.name = csvData[i]["nome"].ToString(); csvData[i]["top_" + j + "_deputy"].ToString();
+                   
+                }
+
+        
+
 
             scatterplotPoints.Add(newDataPoint);
 
@@ -156,33 +198,87 @@ public class Scatterplot : MonoBehaviour
     {
         if (selectedPoint == null) return;
 
+        if (scatterplotMoved)
+        {
+            RemoveAllEdges();
+            scatterplotMoved = false;
+        }
+
         List<ScatterplotDataPoint> closestPoints = new List<ScatterplotDataPoint>();
+        List<float> listDistances = new List<float>(); 
         foreach (ScatterplotDataPoint point in scatterplotPoints)
         {
-            if (point != selectedPoint && Vector3.Distance(point.transform.position, selectedPoint.transform.position) < connectDistance)
+            float distance = Vector3.Distance(point.transform.position, selectedPoint.transform.position);
+
+            if (point != selectedPoint &&  distance < connectDistance)
             {
                 closestPoints.Add(point);
-                if (closestPoints.Count >= 10) break; // break after finding 10 closest points
+                listDistances.Add(distance);
+               // if (closestPoints.Count >= 10) break; // break after finding 10 closest points
             }
         }
 
-        foreach (ScatterplotDataPoint point in closestPoints)
+
+        // Sort closestPoints based on their corresponding distances in listDistances
+        closestPoints = closestPoints.OrderBy(point => listDistances[closestPoints.IndexOf(point)]).ToList();
+
+        IList list = closestPoints;
+        for (int i = 0; i < closestPoints.Count; i++)
         {
-            GameObject newLine = new GameObject(edge);
-            newLine.transform.parent = selectedPoint.transform;
-            LineRenderer lineRenderer = newLine.AddComponent<LineRenderer>();
+            Debug.Log("closestPoints " + closestPoints[i]);
+
+        }
+
+        foreach (ScatterplotDataPoint point in closestPoints.GetRange(0, 20))
+        {
+            Debug.Log("ClosestPoints when click the sphere " + point);
+
+            // Create a new edge object between the selected point and its closest points
+            GameObject newEdge = new GameObject(edge);
+            newEdge.transform.parent = selectedPoint.transform;
+
+            // Add a LineRenderer component to draw the edge as a line
+            LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
             lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
             lineRenderer.startColor = selectedPoint.pointColor;
             lineRenderer.endColor = point.pointColor;
             lineRenderer.startWidth = 0.0006f;
             lineRenderer.endWidth = 0.0006f;
+
+            // Set the edge's start and end points to the positions of the selected point and its closest points
             lineRenderer.SetPosition(0, selectedPoint.transform.position);
             lineRenderer.SetPosition(1, point.transform.position);
         }
 
+        // Deselect the points
+        selectedPoint = null;
         isConnected = true;
 
       
+    }
+
+    public void RemoveAllEdges()
+    {
+        foreach (ScatterplotDataPoint point in scatterplotPoints)
+        {
+            int numEdges = point.transform.childCount;
+            for (int i = numEdges - 1; i >= 0; i--)
+            {
+                Destroy(point.transform.GetChild(i).gameObject);
+            }
+        }
+    }
+
+    private bool scatterplotPointsMoved()
+    {
+        foreach(ScatterplotDataPoint point in scatterplotPoints)
+        {
+            if (point.transform.hasChanged)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
 

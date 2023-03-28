@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class ScatterplotDataPoint : MonoBehaviour
@@ -16,8 +17,7 @@ public class ScatterplotDataPoint : MonoBehaviour
 
 
     private float colorDelta = 0.4f;
-
-
+    public Vector3 position;
 
     public void Select()
     {
@@ -59,7 +59,11 @@ public class ScatterplotDataPoint : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(textLabel.enabled)
+        if (textLabel != null && textLabel.TryGetComponent(out TextMeshPro tmp))
+        
+       
+
+        if (textLabel.enabled)
             transform.LookAt(Camera.main.transform); // so that the text label, if visible, always faces the camera
 
     }
