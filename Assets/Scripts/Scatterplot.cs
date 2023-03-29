@@ -21,6 +21,7 @@ public class Scatterplot : MonoBehaviour
     private bool scatterplotMoved = false;
 
     public TMP_Text deputadoText;
+    public TMP_Text deputadoSimilar;
 
 
 
@@ -111,6 +112,7 @@ public class Scatterplot : MonoBehaviour
 
         List<Dictionary<string, object>> csvData = CSVReader.Read(datasetPath);
         string allDeputies = "";
+      
 
 
 
@@ -151,11 +153,7 @@ public class Scatterplot : MonoBehaviour
             // similar deputies columns
 
 
-            for (int j = 1; j <= 10; j++)
-                {
-                    newDataPoint.gameObject.name = csvData[i]["nome"].ToString(); csvData[i]["top_" + j + "_deputy"].ToString();
-                   
-                }
+           
 
         
 
@@ -163,6 +161,14 @@ public class Scatterplot : MonoBehaviour
             scatterplotPoints.Add(newDataPoint);
             // Display all the deputies' names in the UI
             deputadoText.text = allDeputies;
+
+            for (int j = 1; j <= 10; j++)
+            {
+                newDataPoint.gameObject.name = csvData[i]["nome"].ToString() + '\n';
+               
+
+
+            }
 
 
 
@@ -175,6 +181,8 @@ public class Scatterplot : MonoBehaviour
         // Should also adjust size of scatterplot collider box here based on points positions
 
     }
+
+   
 
     public void allEdges()
     {
@@ -239,20 +247,23 @@ public class Scatterplot : MonoBehaviour
 
         // Sort closestPoints based on their corresponding distances in listDistances
         closestPoints = closestPoints.OrderBy(point => listDistances[closestPoints.IndexOf(point)]).ToList();
+        
+        // Get the unique closest points
+        List<ScatterplotDataPoint> uniqueClosestPoints = closestPoints.Distinct().ToList();
 
-        IList list = closestPoints;
-        for (int i = 0; i < closestPoints.Count; i++)
+
+       
+       
+        // Clear the current text in deputadoSimilar
+        deputadoSimilar.text = "";
+
+        foreach (ScatterplotDataPoint point in uniqueClosestPoints.GetRange(0, 10))
         {
-            Debug.Log("closestPoints " + closestPoints[i]);
-
-        }
-
-        foreach (ScatterplotDataPoint point in closestPoints.GetRange(0, 20))
-        {
-            Debug.Log("ClosestPoints when click the sphere " + point);
+            Debug.Log("ClosestPoints when click the sphere " + point.name);
+            deputadoSimilar.text += point.name + " -  " + point.dataClass + "\n";
 
             // Create a new edge object between the selected point and its closest points
-            GameObject newEdge = new GameObject(edge);
+            GameObject newEdge = new GameObject("Edge");
             newEdge.transform.parent = selectedPoint.transform;
 
             // Add a LineRenderer component to draw the edge as a line
@@ -262,6 +273,8 @@ public class Scatterplot : MonoBehaviour
             lineRenderer.endColor = point.pointColor;
             lineRenderer.startWidth = 0.0006f;
             lineRenderer.endWidth = 0.0006f;
+            lineRenderer.useWorldSpace = false;
+
 
             // Set the edge's start and end points to the positions of the selected point and its closest points
             lineRenderer.SetPosition(0, selectedPoint.transform.position);
