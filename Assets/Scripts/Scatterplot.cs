@@ -4,10 +4,10 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using UnityEngine;
+using TMPro;
 
 public class Scatterplot : MonoBehaviour
 {
-    private string filename = Application.dataPath + "/Resources/Data/deputados_valid_result.csv";
     public GameObject pointPrefab;
     List<ScatterplotDataPoint> scatterplotPoints = null;
 
@@ -19,6 +19,8 @@ public class Scatterplot : MonoBehaviour
     public string edge = "Edge";
 
     private bool scatterplotMoved = false;
+
+    public TMP_Text deputadoText;
 
 
 
@@ -108,6 +110,8 @@ public class Scatterplot : MonoBehaviour
         scatterplotPoints = new List<ScatterplotDataPoint>();
 
         List<Dictionary<string, object>> csvData = CSVReader.Read(datasetPath);
+        string allDeputies = "";
+
 
 
         for (var i = 0; i < csvData.Count; i++)
@@ -119,7 +123,7 @@ public class Scatterplot : MonoBehaviour
 
             float z = 0.05f * System.Convert.ToSingle(csvData[i]["z"]);
             
-            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*6, y*6, z*6), Quaternion.identity).
+            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*6, y*6, z*6), Quaternion.identity). 
                 GetComponent<ScatterplotDataPoint>();
 
             newDataPoint.transform.position += this.transform.position;
@@ -138,11 +142,16 @@ public class Scatterplot : MonoBehaviour
 
 
 
+            // adding text to UI
+            allDeputies += csvData[i]["nome"].ToString() + '\n';
+
+
+
 
             // similar deputies columns
-           
 
-                for (int j = 1; j <= 10; j++)
+
+            for (int j = 1; j <= 10; j++)
                 {
                     newDataPoint.gameObject.name = csvData[i]["nome"].ToString(); csvData[i]["top_" + j + "_deputy"].ToString();
                    
@@ -152,41 +161,48 @@ public class Scatterplot : MonoBehaviour
 
 
             scatterplotPoints.Add(newDataPoint);
+            // Display all the deputies' names in the UI
+            deputadoText.text = allDeputies;
 
 
 
 
         }
 
-        // Create edges between all pairs of points
-      //  for (int i = 0; i < scatterplotPoints.Count; i++)
-        //{
-        //    for (int j = i + 1; j < scatterplotPoints.Count; j++)
-          //  {
-                // Calculate distance between the two points
-             //   float distance = Vector3.Distance(scatterplotPoints[i].transform.position, scatterplotPoints[j].transform.position);
-
-                // Create a new edge object between the two points
-              //  GameObject newEdge = new GameObject("Edge " + i + "-" + j);
-              //  newEdge.transform.parent = this.transform;
-
-                // Add a LineRenderer component to draw the edge as a line
-              //  LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
-              //  lineRenderer.startWidth = 0.00002f;
-              //  lineRenderer.endWidth = 0.00002f;
-              //  lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
-
-                // Set the edge's start and end points to the positions of the two points
-             //   lineRenderer.SetPosition(0, scatterplotPoints[i].transform.position);
-              //  lineRenderer.SetPosition(1, scatterplotPoints[j].transform.position);
-                
-           // }
-       // }
 
 
 
         // Should also adjust size of scatterplot collider box here based on points positions
 
+    }
+
+    public void allEdges()
+    {
+
+        // Create edges between all pairs of points
+        for (int i = 0; i < scatterplotPoints.Count; i++)
+        {
+            for (int j = i + 1; j < scatterplotPoints.Count; j++)
+            {
+                // Calculate distance between the two points
+                float distance = Vector3.Distance(scatterplotPoints[i].transform.position, scatterplotPoints[j].transform.position);
+
+                // Create a new edge object between the two points
+                GameObject newEdge = new GameObject("Edge " + i + "-" + j);
+                newEdge.transform.parent = this.transform;
+
+                // Add a LineRenderer component to draw the edge as a line
+                LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
+                lineRenderer.startWidth = 0.00002f;
+                lineRenderer.endWidth = 0.00002f;
+                lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+
+                // Set the edge's start and end points to the positions of the two points
+                lineRenderer.SetPosition(0, scatterplotPoints[i].transform.position);
+                lineRenderer.SetPosition(1, scatterplotPoints[j].transform.position);
+
+            }
+        }
     }
 
 
@@ -198,8 +214,10 @@ public class Scatterplot : MonoBehaviour
     {
         if (selectedPoint == null) return;
 
+        // Remove all edges if the scatterplot has moved
         if (scatterplotMoved)
         {
+            Debug.Log("scatterplotMoved  if");
             RemoveAllEdges();
             scatterplotMoved = false;
         }
@@ -275,9 +293,12 @@ public class Scatterplot : MonoBehaviour
         {
             if (point.transform.hasChanged)
             {
+                Debug.Log(" scatterplotPointsMoved true");
                 return true;
             }
         }
+        Debug.Log("scatterplotPointsMoved false");
+
         return false;
     }
 
