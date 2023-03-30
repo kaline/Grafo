@@ -22,6 +22,12 @@ public class Scatterplot : MonoBehaviour
 
     public TMP_Text deputadoText;
     public TMP_Text deputadoSimilar;
+    public TMP_Text Label;
+
+    List<GameObject> edges = new List<GameObject>();
+
+
+
 
 
 
@@ -69,6 +75,7 @@ public class Scatterplot : MonoBehaviour
                 scatterplotMoved = true;
             }
 
+
             //RemoveAllEdges();
             ConnectPoints();
 
@@ -78,12 +85,22 @@ public class Scatterplot : MonoBehaviour
             if (Physics.Raycast(ray, out hit)) // check if mouse click hit a collider
             {
                 ScatterplotDataPoint clickedPoint = hit.collider.GetComponent<ScatterplotDataPoint>();
+                
+                if (clickedPoint != null && selectedPoint == clickedPoint) // if the same point is clicked again
+                {
+                    if (isConnected)
+                    {
+                        RemoveAllEdgesButton();
+                    }
+                    selectedPoint = null;
+                    isConnected = false;
+                }
 
                 if (clickedPoint != null && selectedPoint == null) // if a point is clicked and no point is currently selected
                 {
                     selectedPoint = clickedPoint; // select the clicked point
                 }
-                else if (clickedPoint != null && clickedPoint != selectedPoint) // if a point is clicked and another point is selected
+                else if (clickedPoint != null && clickedPoint != selectedPoint && clickedPoint != selectedPoint) // if a point is clicked and another point is selected
                 {
                     float distance = Vector3.Distance(clickedPoint.transform.position, selectedPoint.transform.position);
 
@@ -94,7 +111,14 @@ public class Scatterplot : MonoBehaviour
                         selectedPoint = null;
                         clickedPoint = null;
 
-                        isConnected = true;
+                    }
+                    else
+                    {
+                        // deselect the points
+                        selectedPoint = null;
+                        clickedPoint = null;
+                        isConnected = false;
+
                     }
                 }
             }
@@ -150,9 +174,7 @@ public class Scatterplot : MonoBehaviour
 
 
 
-            // similar deputies columns
-
-
+          
            
 
         
@@ -236,6 +258,13 @@ public class Scatterplot : MonoBehaviour
         {
             float distance = Vector3.Distance(point.transform.position, selectedPoint.transform.position);
 
+            if(point == selectedPoint)
+            {
+                Debug.Log("Selected point " + point);
+                Label.text = point.name; 
+
+            }
+
             if (point != selectedPoint &&  distance < connectDistance)
             {
                 closestPoints.Add(point);
@@ -265,6 +294,10 @@ public class Scatterplot : MonoBehaviour
             // Create a new edge object between the selected point and its closest points
             GameObject newEdge = new GameObject("Edge");
             newEdge.transform.parent = selectedPoint.transform;
+
+            // Add the edge to the list of edges
+            edges.Add(newEdge);
+            Debug.Log("edges "+ edges);
 
             // Add a LineRenderer component to draw the edge as a line
             LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
@@ -299,6 +332,17 @@ public class Scatterplot : MonoBehaviour
             }
         }
     }
+
+    public void RemoveAllEdgesButton()
+    {
+        Debug.Log(" RemoveAllEdgesButton ");
+        foreach (GameObject edge in edges)
+        {
+            Destroy(edge);
+        }
+        edges.Clear();
+    }
+
 
     private bool scatterplotPointsMoved()
     {

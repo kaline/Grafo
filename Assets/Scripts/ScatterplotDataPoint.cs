@@ -12,12 +12,12 @@ public class ScatterplotDataPoint : MonoBehaviour
     public TMPro.TMP_Text textLabel;
     public Color pointColor;
 
-
     public bool showTextLabel = false;
 
 
     private float colorDelta = 0.4f;
     public Vector3 position;
+
 
     public void Select()
     {
@@ -45,6 +45,8 @@ public class ScatterplotDataPoint : MonoBehaviour
 
 
     }
+
+   
 
 
 
