@@ -25,10 +25,11 @@ public class Scatterplot : MonoBehaviour
     public TMP_Text deputadoText;
     public TMP_Text deputadoSimilar;
     public TMP_Text Label;
+    public TMP_Text infoDeputado;
 
     List<GameObject> edges = new List<GameObject>();
 
-    public imageDeputado imageDeputadoScript;
+    public imageDeputado imageDeputadoScript = new imageDeputado();
 
 
 
@@ -176,18 +177,11 @@ public class Scatterplot : MonoBehaviour
             newDataPoint.pointColor = newColor;
             // Set the image url
             newDataPoint.urlFoto = csvData[i]["urlFoto"].ToString();
+            newDataPoint.siglaUf = csvData[i]["siglaUf"].ToString();
 
 
             // adding text to UI
             allDeputies += csvData[i]["nome"].ToString() + '\n';
-
-
-
-
-          
-           
-
-        
 
 
             scatterplotPoints.Add(newDataPoint);
@@ -272,12 +266,13 @@ public class Scatterplot : MonoBehaviour
             {
                 Debug.Log("Selected point " + point);
                 Label.text = point.name;
-                if (imageDeputadoScript != null)
-                {
+               
                     // get the image url for the selected point and update the image
                     string imageUrl = point.GetComponent<ScatterplotDataPoint>().urlFoto;
-                    StartCoroutine(LoadImage(imageUrl));
-                }
+                    StartCoroutine(imageDeputadoScript.GetImage(imageUrl));
+                
+
+                infoDeputado.text = point.name + "\n" + point.dataClass + "\n" + point.siglaUf;
 
 
             }
@@ -338,23 +333,7 @@ public class Scatterplot : MonoBehaviour
       
     }
 
-    private IEnumerator LoadImage(string imageUrl)
-    {
-        UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
-        yield return request.SendWebRequest();
-        if (request.isNetworkError || request.isHttpError)
-        {
-            Debug.Log(request.error);
-        }
-        else
-        {
-            Texture2D downloadTexture = DownloadHandlerTexture.GetContent(request) as Texture2D;
-            if (imageDeputadoScript != null)
-            {
-                imageDeputadoScript.GetComponent<Image>().sprite = Sprite.Create(downloadTexture, new Rect(0, 0, downloadTexture.width, downloadTexture.height), new Vector2(0, 0));
-            }
-        }
-    }
+   
 
     public void RemoveAllEdges()
     {

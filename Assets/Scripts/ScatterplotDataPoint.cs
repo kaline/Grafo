@@ -19,7 +19,7 @@ public class ScatterplotDataPoint : MonoBehaviour
     public Vector3 position;
 
     public string urlFoto;
-
+    public string siglaUf;
 
     public void Select()
     {

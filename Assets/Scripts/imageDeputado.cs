@@ -33,6 +33,9 @@ public class imageDeputado : MonoBehaviour
         
     }
 
+     
+    
+
     public void ShowImage(string id)
     {
         string url;
@@ -42,7 +45,7 @@ public class imageDeputado : MonoBehaviour
         }
     }
 
-    private IEnumerator GetImage(string imageUrl)
+    public IEnumerator GetImage(string imageUrl)
     {
         UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
         yield return request.SendWebRequest();
