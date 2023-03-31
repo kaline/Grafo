@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using UnityEngine;
 using TMPro;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 
 public class Scatterplot : MonoBehaviour
 {
@@ -13,7 +15,7 @@ public class Scatterplot : MonoBehaviour
 
     public float connectDistance = 0.0001f;
 
-    private ScatterplotDataPoint selectedPoint = null;
+    public ScatterplotDataPoint selectedPoint = null;
     private bool isConnected = false;
 
     public string edge = "Edge";
@@ -26,6 +28,8 @@ public class Scatterplot : MonoBehaviour
 
     List<GameObject> edges = new List<GameObject>();
 
+    public imageDeputado imageDeputadoScript;
+
 
 
 
@@ -35,9 +39,13 @@ public class Scatterplot : MonoBehaviour
     void Start()
     {
 
+        // Initialize imageDeputadoScript reference
+        imageDeputadoScript = GameObject.Find("ImageObject").GetComponent<imageDeputado>();
+
         try
         {
-            LoadPoints("Data/deputados_valid_result");
+            LoadPoints("Data/deputados_valid_result_colors");
+
 
             // Find all ScatterplotDataPoints in the scene
             ScatterplotDataPoint[] points = FindObjectsOfType<ScatterplotDataPoint>();
@@ -60,9 +68,10 @@ public class Scatterplot : MonoBehaviour
         }
 
 
+
     }
 
-
+  
 
 
     void Update()
@@ -165,7 +174,8 @@ public class Scatterplot : MonoBehaviour
             newColor.a = 1f;
             newDataPoint.GetComponent<Renderer>().material.color = newColor;
             newDataPoint.pointColor = newColor;
-
+            // Set the image url
+            newDataPoint.urlFoto = csvData[i]["urlFoto"].ToString();
 
 
             // adding text to UI
@@ -261,7 +271,14 @@ public class Scatterplot : MonoBehaviour
             if(point == selectedPoint)
             {
                 Debug.Log("Selected point " + point);
-                Label.text = point.name; 
+                Label.text = point.name;
+                if (imageDeputadoScript != null)
+                {
+                    // get the image url for the selected point and update the image
+                    string imageUrl = point.GetComponent<ScatterplotDataPoint>().urlFoto;
+                    StartCoroutine(LoadImage(imageUrl));
+                }
+
 
             }
 
@@ -319,6 +336,24 @@ public class Scatterplot : MonoBehaviour
         isConnected = true;
 
       
+    }
+
+    private IEnumerator LoadImage(string imageUrl)
+    {
+        UnityWebRequest request = UnityWebRequestTexture.GetTexture(imageUrl);
+        yield return request.SendWebRequest();
+        if (request.isNetworkError || request.isHttpError)
+        {
+            Debug.Log(request.error);
+        }
+        else
+        {
+            Texture2D downloadTexture = DownloadHandlerTexture.GetContent(request) as Texture2D;
+            if (imageDeputadoScript != null)
+            {
+                imageDeputadoScript.GetComponent<Image>().sprite = Sprite.Create(downloadTexture, new Rect(0, 0, downloadTexture.width, downloadTexture.height), new Vector2(0, 0));
+            }
+        }
     }
 
     public void RemoveAllEdges()

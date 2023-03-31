@@ -18,6 +18,8 @@ public class ScatterplotDataPoint : MonoBehaviour
     private float colorDelta = 0.4f;
     public Vector3 position;
 
+    public string urlFoto;
+
 
     public void Select()
     {
