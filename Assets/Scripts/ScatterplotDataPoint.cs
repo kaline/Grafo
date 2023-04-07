@@ -9,7 +9,7 @@ public class ScatterplotDataPoint : MonoBehaviour
     public string pointName;
     public string dataClass;
 
-    public TMPro.TMP_Text textLabel;
+    public TMP_Text textLabel;
     public Color pointColor;
 
     public bool showTextLabel = false;
@@ -20,9 +20,28 @@ public class ScatterplotDataPoint : MonoBehaviour
 
     public string urlFoto;
     public string siglaUf;
+    public Scatterplot scatterplot;
+
+
+
 
     public void Select()
     {
+        Debug.Log("scatterplot: " + scatterplot);
+
+        if (scatterplot != null)
+        {
+            scatterplot.selectedPoint = this;
+            scatterplot.ConnectPoints();
+ 
+        }
+        else
+        {
+            Debug.Log("Scatterplot is null or has been destroyed");
+            Debug.LogWarning("Scatterplot is null or has been destroyed");
+        }
+        this.GetComponent<Renderer>().material.color = new Color(pointColor.r + colorDelta, pointColor.g + colorDelta, pointColor.b + colorDelta, pointColor.a);
+
 
     }
 
@@ -34,21 +53,30 @@ public class ScatterplotDataPoint : MonoBehaviour
 
     public void Highlight()
     {
-        textLabel.enabled = true;
+        Debug.Log("Textlabel ", textLabel);
+        if (textLabel != null)
+        {
+            textLabel.enabled = true;
+        }
         this.GetComponent<Renderer>().material.color = new Color(pointColor.r + colorDelta, pointColor.g + colorDelta, pointColor.b + colorDelta, pointColor.a);
-
+        //Scatterplot scatterplot = this.GetComponent<Scatterplot>();
+      
 
     }
 
     public void Unhighlight()
     {
-        textLabel.enabled = false;
+        if (textLabel != null)
+        {
+            textLabel.enabled = false;
+        }
         this.GetComponent<Renderer>().material.color = new Color(pointColor.r, pointColor.g, pointColor.b, pointColor.a);
+
 
 
     }
 
-   
+
 
 
 

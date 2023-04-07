@@ -51,6 +51,7 @@ public class imageDeputado : MonoBehaviour
         yield return request.SendWebRequest();
         if(request.isNetworkError || request.isHttpError)
         {
+
             Debug.Log(request.error);
         }
         else

@@ -203,7 +203,7 @@ Transform:
   m_GameObject: {fileID: 4401916673266802016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.02507317, y: 4.95, z: 1.8943636}
-  m_LocalScale: {x: 0.012782754, y: 0.012782754, z: 0.012782754}
+  m_LocalScale: {x: 0.028726498, y: 0.026912771, z: 0.022420479}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 3109092151091538470}
@@ -291,10 +291,9 @@ MonoBehaviour:
   pointColor: {r: 0, g: 0, b: 0, a: 0}
   showTextLabel: 0
   position: {x: 0, y: 0, z: 0}
-  connectDistance: 0.0001
-  edge: Edge
-  deputadoText: {fileID: 0}
-  deputadoSimilar: {fileID: 0}
+  urlFoto: 
+  siglaUf: 
+  scatterplot: {fileID: 0}
 --- !u!114 &3033507728953815187
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,19 +326,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 8976340809940886640}
         m_TargetAssemblyTypeName: ScatterplotDataPoint, Assembly-CSharp
-        m_MethodName: Highlight
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 8976340809940886640}
-        m_TargetAssemblyTypeName: ScatterplotDataPoint, Assembly-CSharp
-        m_MethodName: ConnectPoints
+        m_MethodName: Select
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

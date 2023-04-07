@@ -7,11 +7,12 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class Scatterplot : MonoBehaviour
 {
     public GameObject pointPrefab;
-    List<ScatterplotDataPoint> scatterplotPoints = null;
+    public List<ScatterplotDataPoint> scatterplotPoints = null;
 
     public float connectDistance = 0.0001f;
 
@@ -30,8 +31,7 @@ public class Scatterplot : MonoBehaviour
     List<GameObject> edges = new List<GameObject>();
 
     public imageDeputado imageDeputadoScript = new imageDeputado();
-
-
+    public GameObject buttonPT;
 
 
 
@@ -69,7 +69,6 @@ public class Scatterplot : MonoBehaviour
         }
 
 
-
     }
 
   
@@ -77,6 +76,8 @@ public class Scatterplot : MonoBehaviour
 
     void Update()
     {
+        // Add a listener to the buttonOne
+        //buttonPT.GetComponent<Button>().onClick.AddListener(UpdateSphereColors);
         if (Input.GetMouseButtonDown(0)) // check for left mouse button click
         {
 
@@ -159,8 +160,9 @@ public class Scatterplot : MonoBehaviour
 
             float z = 0.05f * System.Convert.ToSingle(csvData[i]["z"]);
             
-            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*6, y*6, z*6), Quaternion.identity). 
+            ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*15, y*15, z*15), Quaternion.identity). 
                 GetComponent<ScatterplotDataPoint>();
+            //pointPrefab.transform.parent = transform;
 
             newDataPoint.transform.position += this.transform.position;
             newDataPoint.transform.parent = this.transform;
@@ -178,7 +180,7 @@ public class Scatterplot : MonoBehaviour
             // Set the image url
             newDataPoint.urlFoto = csvData[i]["urlFoto"].ToString();
             newDataPoint.siglaUf = csvData[i]["siglaUf"].ToString();
-
+            newDataPoint.scatterplot = this;
 
             // adding text to UI
             allDeputies += csvData[i]["nome"].ToString() + '\n';
@@ -188,13 +190,13 @@ public class Scatterplot : MonoBehaviour
             // Display all the deputies' names in the UI
             deputadoText.text = allDeputies;
 
-            for (int j = 1; j <= 10; j++)
-            {
-                newDataPoint.gameObject.name = csvData[i]["nome"].ToString() + '\n';
+           // for (int j = 1; j <= 10; j++)
+            //{
+            //    newDataPoint.gameObject.name = csvData[i]["nome"].ToString() + '\n';
                
 
 
-            }
+           // }
 
 
 
@@ -208,7 +210,36 @@ public class Scatterplot : MonoBehaviour
 
     }
 
-   
+    public void UpdateSphereColors()
+    {
+        Color color = Color.white;
+        color.a = 0.42f;
+        // Loop through all scatterplot points
+        foreach (ScatterplotDataPoint point in scatterplotPoints)
+        {
+            Debug.Log("point 1" + point.dataClass);
+
+            // Check if the sphere has a different siglaPartido from PT
+            if (point.dataClass != "PT")
+            {
+                Debug.Log("point " + point.dataClass);
+
+                // Update the sphere color
+                point.GetComponent<Renderer>().material.color = color;
+                point.pointColor = color;
+            }
+        }
+    }
+
+    public void UpdateSphereOriginalColor()
+    {
+        Scene scene = SceneManager.GetActiveScene(); 
+        SceneManager.LoadScene(scene.name);
+
+    }
+
+
+
 
     public void allEdges()
     {
@@ -306,6 +337,7 @@ public class Scatterplot : MonoBehaviour
             // Create a new edge object between the selected point and its closest points
             GameObject newEdge = new GameObject("Edge");
             newEdge.transform.parent = selectedPoint.transform;
+          
 
             // Add the edge to the list of edges
             edges.Add(newEdge);
