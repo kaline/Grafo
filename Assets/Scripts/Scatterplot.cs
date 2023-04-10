@@ -27,11 +27,16 @@ public class Scatterplot : MonoBehaviour
     public TMP_Text deputadoSimilar;
     public TMP_Text Label;
     public TMP_Text infoDeputado;
+    public TMP_Text  partidoRanking;
+
 
     List<GameObject> edges = new List<GameObject>();
 
     public imageDeputado imageDeputadoScript = new imageDeputado();
-    public GameObject buttonPT;
+    //public GameObject buttonPT;
+
+    Color newColor = new Color();
+
 
 
 
@@ -45,7 +50,9 @@ public class Scatterplot : MonoBehaviour
 
         try
         {
-            LoadPoints("Data/deputados_valid_result_colors");
+            LoadPoints("Data/deputados_gender");
+            showPartidoRanking("Data/deputados_ranking");
+
 
 
             // Find all ScatterplotDataPoints in the scene
@@ -67,6 +74,7 @@ public class Scatterplot : MonoBehaviour
         {
             Debug.LogError("An IO error occurred while reading the file. " + e.Message);
         }
+
 
 
     }
@@ -172,7 +180,6 @@ public class Scatterplot : MonoBehaviour
 
             newDataPoint.textLabel.text = csvData[i]["nome"].ToString() + " (" + newDataPoint.dataClass + ")";
 
-            Color newColor = new Color();
             ColorUtility.TryParseHtmlString(csvData[i]["cores"].ToString(), out newColor);
             newColor.a = 1f;
             newDataPoint.GetComponent<Renderer>().material.color = newColor;
@@ -180,6 +187,7 @@ public class Scatterplot : MonoBehaviour
             // Set the image url
             newDataPoint.urlFoto = csvData[i]["urlFoto"].ToString();
             newDataPoint.siglaUf = csvData[i]["siglaUf"].ToString();
+            newDataPoint.gender = csvData[i]["gender"].ToString();
             newDataPoint.scatterplot = this;
 
             // adding text to UI
@@ -210,25 +218,120 @@ public class Scatterplot : MonoBehaviour
 
     }
 
-    public void UpdateSphereColors()
+
+
+
+    Dictionary<string, string> partyColors = new Dictionary<string, string>()
+{
+    {"UNIÃO", "#8B4513"},
+    {"NOVO", "#004445"},
+    {"PP", "#00BFFF"},
+    {"PSDB", "#0072C6"},
+    {"PT", "#FF0000"},
+    {"PATRIOTA", "#4B0082"},
+    {"REPUBLICANOS", "#FF7F00"},
+    {"PSB", "#FFD700"},
+    {"PSD", "#BDB76B"},
+    {"PCdoB", "#FF69B4"},
+    {"PV", "#00FF7F"},
+    {"PROS", "#00CED1"},
+    {"PSC", "#FF1493"},
+    {"PDT", "#2E8B57"},
+    {"AVANTE", "#DC143C"},
+    {"CIDADANIA", "#FFC0CB"},
+    {"PSOL", "#800080"},
+    {"SOLIDARIEDADE", "#ADD8E6"},
+    {"PL", "#8B0000"},
+    {"MDB", "#006400"},
+    {"PTB", "#FFDAB9"},
+    {"PODE", "#228B22"},
+    {"REDE", "#FFA500"},
+    {"S.PART.", "#808080"}
+};
+
+    public void UpdateSphereColors(string siglaPartido)
     {
-        Color color = Color.white;
-        color.a = 0.42f;
+        Color newColor1 = Color.white;
+        newColor1.a = 0.42f;
+
         // Loop through all scatterplot points
         foreach (ScatterplotDataPoint point in scatterplotPoints)
         {
-            Debug.Log("point 1" + point.dataClass);
-
-            // Check if the sphere has a different siglaPartido from PT
-            if (point.dataClass != "PT")
+            if (point.dataClass == siglaPartido)
             {
-                Debug.Log("point " + point.dataClass);
+                // Update the color with the original color of siglaPartido
+                string hexColor = partyColors[siglaPartido];
+                Color newColor = Color.white;
+                ColorUtility.TryParseHtmlString(hexColor, out newColor);
+                newColor.a = 0.42f;
+                point.GetComponent<Renderer>().material.color = newColor;
+                point.pointColor = newColor;
+            }
+            else
+            {
+                // Update the color to white
+                point.GetComponent<Renderer>().material.color = newColor1;
+                point.pointColor = newColor1;
+            }
+        }
+    }
 
-                // Update the sphere color
+
+
+
+
+    public void genderColors()
+    {
+        Color color = Color.magenta;
+
+        foreach(ScatterplotDataPoint point in scatterplotPoints)
+        {
+            Debug.Log("gender " + point.gender);
+
+            if(point.gender == "Feminino")
+            {
                 point.GetComponent<Renderer>().material.color = color;
                 point.pointColor = color;
             }
+            else if(point.gender == "Masculino"){
+                point.GetComponent<Renderer>().material.color = Color.blue;
+                point.pointColor = Color.blue;
+
+            }
+            else if (point.gender == "Desconhecido")
+            {
+                point.GetComponent<Renderer>().material.color = Color.grey;
+                point.pointColor = Color.grey;
+
+            }
         }
+    }
+
+    public void showInfoGender()
+    {
+        
+        List<Dictionary<string, object>> csvData = CSVReader.Read("");
+        for (var i = 0; i < csvData.Count; i++)
+        {
+            
+        }
+
+
+    }
+
+    public void showPartidoRanking(string  datapath)
+    {
+        string partidos = "";
+        List<Dictionary<string, object>> csvData = CSVReader.Read(datapath);
+
+        for (var i = 0; i < csvData.Count; i++)
+        {
+            partidos += csvData[i]["siglaPartido"].ToString() + " - " + csvData[i]["Count"].ToString() + csvData[i]["Percentage"].ToString()  + "%3" + '\n';
+            partidoRanking.text = partidos;
+
+        }
+
+
     }
 
     public void UpdateSphereOriginalColor()

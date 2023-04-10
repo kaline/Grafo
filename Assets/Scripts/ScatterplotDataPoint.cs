@@ -20,6 +20,7 @@ public class ScatterplotDataPoint : MonoBehaviour
 
     public string urlFoto;
     public string siglaUf;
+    public string gender;
     public Scatterplot scatterplot;
 
 
