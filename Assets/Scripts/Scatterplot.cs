@@ -28,6 +28,10 @@ public class Scatterplot : MonoBehaviour
     public TMP_Text Label;
     public TMP_Text infoDeputado;
     public TMP_Text  partidoRanking;
+    public TMP_Text LabelWomenNumber;
+    public TMP_Text LabelWomenPercentage;
+
+
 
 
     List<GameObject> edges = new List<GameObject>();
@@ -50,8 +54,8 @@ public class Scatterplot : MonoBehaviour
 
         try
         {
-            LoadPoints("Data/deputados_gender");
-            showPartidoRanking("Data/deputados_ranking");
+            LoadPoints("Data/deputados_2022");
+            showPartidoRanking("Data/deputados_ranking_2022");
 
 
 
@@ -277,12 +281,79 @@ public class Scatterplot : MonoBehaviour
     }
 
 
+    public void UpdateSphereColorsUF(string siglauf)
+    {
+        // Loop through all scatterplot points
+        foreach (ScatterplotDataPoint point in scatterplotPoints)
+        {
+            if (point.siglaUf == siglauf)
+            {
+                // Reset the color to the original color
+                point.GetComponent<Renderer>().material.color = point.pointColor;
+            }
+            else
+            {
+                // Update the color to white
+                Color newColor = Color.white;
+                newColor.a = 0.42f;
+                // Update the color to white
+                point.GetComponent<Renderer>().material.color = newColor;
+            }
+        }
+    }
 
+
+    private string loadedDatasetName;
+    public void LoadNewDataset(string datasetName)
+    {
+
+        foreach(ScatterplotDataPoint point in scatterplotPoints)
+        {
+            Debug.Log("type ScatterplotDataPoint of point " + point);
+            Debug.Log("type ScatterplotDataPoint of scatterplotPoints " + scatterplotPoints);
+
+
+            Destroy(point.gameObject);
+        }
+
+        scatterplotPoints.Clear();
+        
+        // Load and display the new dataset
+        LoadPoints("Data/" + "deputados_" + datasetName);
+        showPartidoRanking("Data/" + "deputados_ranking_" + datasetName);
+
+        // store the loaded dataset name in a class-lvel variable
+        loadedDatasetName = datasetName;
+        
+  
+    }
+
+
+
+   
 
 
     public void genderColors()
     {
         Color color = Color.magenta;
+
+      if(loadedDatasetName == "2022")
+        {
+            LabelWomenNumber.text = "85 mulheres";
+            LabelWomenPercentage.text = "14.98%";
+
+        }else if(loadedDatasetName == "2023")
+        {
+            LabelWomenNumber.text = "85 mulheres";
+            LabelWomenPercentage.text = "14.98%";
+
+        }else if(loadedDatasetName == "2021")
+        {
+            LabelWomenNumber.text = "85 mulheres";
+            LabelWomenPercentage.text = "14.98%";
+        }
+           
+        
 
         foreach(ScatterplotDataPoint point in scatterplotPoints)
         {
@@ -296,13 +367,11 @@ public class Scatterplot : MonoBehaviour
             else if(point.gender == "Masculino"){
                 point.GetComponent<Renderer>().material.color = Color.blue;
                 point.pointColor = Color.blue;
-
             }
             else if (point.gender == "Desconhecido")
             {
                 point.GetComponent<Renderer>().material.color = Color.grey;
                 point.pointColor = Color.grey;
-
             }
         }
     }
@@ -344,34 +413,81 @@ public class Scatterplot : MonoBehaviour
 
 
 
+    //public void allEdges()
+    //{
+
+    //    // Create edges between all pairs of points
+    //    for (int i = 0; i < scatterplotPoints.Count; i++)
+    //    {
+    //        for (int j = i + 1; j < scatterplotPoints.Count; j++)
+    //        {
+    //            // Calculate distance between the two points
+    //            float distance = Vector3.Distance(scatterplotPoints[i].transform.position, scatterplotPoints[j].transform.position);
+
+    //            // Create a new edge object between the two points
+    //            GameObject newEdge = new GameObject("Edge " + i + "-" + j);
+    //            newEdge.transform.parent = this.transform;
+
+    //            // Add a LineRenderer component to draw the edge as a line
+    //            LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
+    //            lineRenderer.startWidth = 0.00002f;
+    //            lineRenderer.endWidth = 0.00002f;
+    //            lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+
+    //            // Set the edge's start and end points to the positions of the two points
+    //            lineRenderer.SetPosition(0, scatterplotPoints[i].transform.position);
+    //            lineRenderer.SetPosition(1, scatterplotPoints[j].transform.position);
+
+    //        }
+    //    }
+    //}
+
     public void allEdges()
     {
+        int numPoints = scatterplotPoints.Count;
 
-        // Create edges between all pairs of points
-        for (int i = 0; i < scatterplotPoints.Count; i++)
+        // Create mesh for all edges
+        Mesh mesh = new Mesh();
+        Vector3[] vertices = new Vector3[numPoints * (numPoints - 1) / 2 * 2]; // Two vertices per edge
+        int[] indices = new int[numPoints * (numPoints - 1) / 2 * 2];
+        int vertexIndex = 0;
+        int index = 0;
+
+        for (int i = 0; i < numPoints; i++)
         {
-            for (int j = i + 1; j < scatterplotPoints.Count; j++)
+            for (int j = i + 1; j < numPoints; j++)
             {
                 // Calculate distance between the two points
                 float distance = Vector3.Distance(scatterplotPoints[i].transform.position, scatterplotPoints[j].transform.position);
 
-                // Create a new edge object between the two points
-                GameObject newEdge = new GameObject("Edge " + i + "-" + j);
-                newEdge.transform.parent = this.transform;
+                // Add vertices for the edge
+                vertices[vertexIndex] = scatterplotPoints[i].transform.position;
+                vertices[vertexIndex + 1] = scatterplotPoints[j].transform.position;
 
-                // Add a LineRenderer component to draw the edge as a line
-                LineRenderer lineRenderer = newEdge.AddComponent<LineRenderer>();
-                lineRenderer.startWidth = 0.00002f;
-                lineRenderer.endWidth = 0.00002f;
-                lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
+                // Add indices for the edge
+                indices[index] = vertexIndex;
+                indices[index + 1] = vertexIndex + 1;
 
-                // Set the edge's start and end points to the positions of the two points
-                lineRenderer.SetPosition(0, scatterplotPoints[i].transform.position);
-                lineRenderer.SetPosition(1, scatterplotPoints[j].transform.position);
-
+                // Increment counters
+                vertexIndex += 2;
+                index += 2;
             }
         }
+
+        // Set up mesh and add to object
+        mesh.vertices = vertices;
+        mesh.SetIndices(indices, MeshTopology.Lines, 0);
+        GetComponent<MeshFilter>().mesh = mesh;
+
+        // Set up line renderer
+        LineRenderer lineRenderer = gameObject.AddComponent<LineRenderer>();
+        lineRenderer.startWidth = 0.00002f;
+        lineRenderer.endWidth = 0.00002f;
+        lineRenderer.material = new Material(Shader.Find("Sprites/Default"));
     }
+
+
+
 
 
 
