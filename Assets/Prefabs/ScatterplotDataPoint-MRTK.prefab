@@ -202,7 +202,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4401916673266802016}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.02507317, y: 4.95, z: 1.8943636}
+  m_LocalPosition: {x: 0.7566274, y: 0.7566274, z: 0.7566274}
   m_LocalScale: {x: 0.028726498, y: 0.026912771, z: 0.022420479}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -293,6 +293,7 @@ MonoBehaviour:
   position: {x: 0, y: 0, z: 0}
   urlFoto: 
   siglaUf: 
+  gender: 
   scatterplot: {fileID: 0}
 --- !u!114 &3033507728953815187
 MonoBehaviour:

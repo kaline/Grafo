@@ -8,6 +8,7 @@ using TMPro;
 using UnityEngine.UI;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using Microsoft.MixedReality.Toolkit.UI;
 
 public class Scatterplot : MonoBehaviour
 {
@@ -31,6 +32,19 @@ public class Scatterplot : MonoBehaviour
     public TMP_Text LabelWomenNumber;
     public TMP_Text LabelWomenPercentage;
 
+    public PinchSlider PinchSliderPosicao;
+    public TMP_Text slidertext;
+
+
+    private float x;
+    private float y;
+    private float z;
+
+    // Declare a member variable to store a reference to the ScatterplotDataPoint object
+    private ScatterplotDataPoint dataPoint;
+
+
+
 
 
 
@@ -42,12 +56,19 @@ public class Scatterplot : MonoBehaviour
     Color newColor = new Color();
 
 
+    private Dictionary<ScatterplotDataPoint, Color> originalColors = new Dictionary<ScatterplotDataPoint, Color>();
 
 
 
     // Use this for initialization
     void Start()
     {
+
+        // Initialize the original color dictionary
+        foreach (ScatterplotDataPoint point in scatterplotPoints)
+        {
+            originalColors[point] = point.GetComponent<Renderer>().material.color;
+        }
 
         // Initialize imageDeputadoScript reference
         imageDeputadoScript = GameObject.Find("ImageObject").GetComponent<imageDeputado>();
@@ -56,6 +77,8 @@ public class Scatterplot : MonoBehaviour
         {
             LoadPoints("Data/deputados_2022");
             showPartidoRanking("Data/deputados_ranking_2022");
+            
+
 
 
 
@@ -149,6 +172,7 @@ public class Scatterplot : MonoBehaviour
 
     }
 
+    private float max_x, min_x, max_y, min_y, max_z, min_z;
 
     public void LoadPoints(string datasetPath)
     {
@@ -166,17 +190,47 @@ public class Scatterplot : MonoBehaviour
         for (var i = 0; i < csvData.Count; i++)
         {
   
-            float x = 0.05f * System.Convert.ToSingle(csvData[i]["x"]);
+            x = 0.05f * System.Convert.ToSingle(csvData[i]["x"]);
 
-            float y = 0.05f * System.Convert.ToSingle(csvData[i]["y"]);
+            y = 0.05f * System.Convert.ToSingle(csvData[i]["y"]);
 
-            float z = 0.05f * System.Convert.ToSingle(csvData[i]["z"]);
+            z = 0.05f * System.Convert.ToSingle(csvData[i]["z"]);
             
+
+
+
             ScatterplotDataPoint newDataPoint = Instantiate(pointPrefab, new Vector3(x*15, y*15, z*15), Quaternion.identity). 
                 GetComponent<ScatterplotDataPoint>();
-            //pointPrefab.transform.parent = transform;
+            dataPoint = newDataPoint.GetComponent<ScatterplotDataPoint>();
+            Debug.Log("Datapoint " + dataPoint);
+
+            if (x > max_x) max_x = x;
+            Debug.Log("max_x" + max_x);
+            if (x < min_x) min_x = x;
+            Debug.Log("min_x" + min_x);
+            if (y > max_y) max_y = y;
+            Debug.Log("max_y" + max_y);
+            if (y < min_y) min_y = y;
+            Debug.Log("min_y" + min_y);
+            if (z > max_z) max_z = z;
+            Debug.Log("max_z" + max_z);
+            if (z < min_z) min_z = z;
+            Debug.Log("min_z" + min_z);
+
+
+            // Calculate range for each axis
+            float range_x = max_x - min_x;
+            float range_y = max_y - min_y;
+            float range_z = max_z - min_z;
+
+            // Calculate scaling factor for each axis based on desired scene size (10x10x10)
+            float scale_x = 10 / range_x;
+            float scale_y = 10 / range_y;
+            float scale_z = 10 / range_z;
+
 
             newDataPoint.transform.position += this.transform.position;
+            Debug.Log("ewDataPoint.transform.position " + newDataPoint.transform.position);
             newDataPoint.transform.parent = this.transform;
             newDataPoint.gameObject.name = csvData[i]["nome"].ToString();
 
@@ -283,21 +337,32 @@ public class Scatterplot : MonoBehaviour
 
     public void UpdateSphereColorsUF(string siglauf)
     {
+        // Update the color to white if it's not already white with an alpha value of 0.42
+        //Color newColor = Color.white;
+        //newColor.a = 0f;
+
+        // Create a new color with all RGB values set to 0 and the alpha value set to 0
+        // Create a new transparent color with alpha value of 0
+        Color32 transparentColor = new Color32(0, 0, 0, 0);
         // Loop through all scatterplot points
         foreach (ScatterplotDataPoint point in scatterplotPoints)
         {
             if (point.siglaUf == siglauf)
             {
-                // Reset the color to the original color
-                point.GetComponent<Renderer>().material.color = point.pointColor;
+                // Reset the color to the original color if it's not already set to it
+                if (point.GetComponent<Renderer>().material.color != point.pointColor || point.GetComponent<Renderer>().material.color != transparentColor)
+                {
+                    point.GetComponent<Renderer>().material.color = point.pointColor;
+                }
             }
             else
             {
-                // Update the color to white
-                Color newColor = Color.white;
-                newColor.a = 0.42f;
-                // Update the color to white
-                point.GetComponent<Renderer>().material.color = newColor;
+               
+                if (point.GetComponent<Renderer>().material.color == point.pointColor &&
+                    point.GetComponent<Renderer>().material.color != transparentColor)
+                {
+                    point.GetComponent<Renderer>().material.color = transparentColor;
+                }
             }
         }
     }
@@ -624,6 +689,26 @@ public class Scatterplot : MonoBehaviour
         return false;
     }
 
+    private float positionSliderNumber;
+
+    public void ChangePinchSliderValues()
+    {
+        slidertext.text = PinchSliderPosicao.SliderValue.ToString();
+
+        //positionSliderNumber = Mathf.Clamp(PinchSliderPosicao.SliderValue, -5f, 5f);
+        positionSliderNumber = PinchSliderPosicao.SliderValue;
+
+        // Find all instances of the ScatterplotDataPoint prefab
+        ScatterplotDataPoint[] dataPoints = FindObjectsOfType<ScatterplotDataPoint>();
+        Debug.Log("datapoints "+dataPoints);
+
+        // Update the position of each instance
+        foreach (ScatterplotDataPoint dataPoi in dataPoints)
+        {
+            Vector3 positionSphere = new Vector3(positionSliderNumber, positionSliderNumber, positionSliderNumber);
+            dataPoi.transform.localScale = positionSphere;
+        }
+    }
 
 
 }
